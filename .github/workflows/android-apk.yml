@@ -1,0 +1,37 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build release APK with Macroquad Android toolchain
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/root/src" \
+            -w /root/src \
+            notfl3/cargo-apk cargo quad-apk build --release
+
+      - name: Collect APK
+        run: |
+          mkdir -p dist
+          find target/android-artifacts/release/apk -type f -name '*.apk' -exec cp {} dist/ \;
+          test -n "$(find dist -type f -name '*.apk' -print -quit)"
+
+      - name: Upload installable APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: master-ludo-android-apk
+          path: dist/*.apk
+          if-no-files-found: error
+          retention-days: 14
