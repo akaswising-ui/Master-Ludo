@@ -28,8 +28,11 @@ render.experimental.xml
 *.jks
 *.keystore
 
-# Google Services (e.g. APIs or Firebase)
+# Google Services (e.g. Firebase)
 google-services.json
 
 # Android Profiling
 *.hprof
+
+# Rust build output
+/target/
