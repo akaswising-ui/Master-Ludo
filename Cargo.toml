@@ -1,0 +1,9 @@
+[package]
+name = "master-ludo"
+version = "0.1.0"
+edition = "2021"
+description = "A Rust-only, offline Ludo board game"
+license = "MIT"
+
+[dependencies]
+macroquad = "0.4.16"
