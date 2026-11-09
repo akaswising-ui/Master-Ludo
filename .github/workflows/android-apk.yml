@@ -67,11 +67,13 @@ jobs:
               test -f "$JAVA_HOME/jre/lib/rt.jar"
               test -f /opt/android-sdk-linux/platforms/android-35/android.jar
 
-              # Install the dx compatibility shim beside every available D8.
+              # cargo-quad-apk calls D8 directly on modern build-tools.
+              # Run its original launcher with Java 17; keep Java 8 for javac.
               for BT_DIR in /opt/android-sdk-linux/build-tools/*; do
-                if [ -x "$BT_DIR/d8" ]; then
-                  cp /root/src/scripts/android-dx-shim.sh "$BT_DIR/dx"
-                  chmod +x "$BT_DIR/dx"
+                if [ -x "$BT_DIR/d8" ] && [ ! -x "$BT_DIR/d8.original" ]; then
+                  mv "$BT_DIR/d8" "$BT_DIR/d8.original"
+                  cp /root/src/scripts/android-d8-java17.sh "$BT_DIR/d8"
+                  chmod +x "$BT_DIR/d8"
                 fi
               done
 
