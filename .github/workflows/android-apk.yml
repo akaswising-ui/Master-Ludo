@@ -26,29 +26,34 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
 
-      - name: Verify Android SDK
+      - name: Verify Android SDK and Java
         run: |
           test -n "$ANDROID_HOME"
           test -f "$ANDROID_HOME/platforms/android-35/android.jar"
           test -x "$ANDROID_HOME/build-tools/35.0.0/aapt"
+          java -version
 
-      - name: Build release APK with compatible Rust toolchain
+      - name: Build release APK with compatible Rust and Java toolchains
         run: |
           docker run --rm \
             -v "${{ github.workspace }}:/root/src" \
             -v "$ANDROID_HOME:/opt/android-sdk-linux" \
+            -v "$JAVA_HOME:/opt/jdk17:ro" \
             -w /root/src \
             -e ANDROID_HOME=/opt/android-sdk-linux \
             -e ANDROID_SDK_ROOT=/opt/android-sdk-linux \
+            -e JAVA_HOME=/opt/jdk17 \
             notfl3/cargo-apk /bin/bash -lc '
               set -e
+              export JAVA_HOME=/opt/jdk17
+              export PATH="$JAVA_HOME/bin:/opt/android-sdk-linux/build-tools/35.0.0:$PATH"
+              java -version
               rustup toolchain install 1.87.0 --profile minimal
               rustup target add --toolchain 1.87.0 armv7-linux-androideabi aarch64-linux-android
               rustup default 1.87.0
               rustc --version
               cargo --version
               test -f /opt/android-sdk-linux/platforms/android-35/android.jar
-              export PATH="/opt/android-sdk-linux/build-tools/35.0.0:$PATH"
               cargo quad-apk build --release
             '
 
