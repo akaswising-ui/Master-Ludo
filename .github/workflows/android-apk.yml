@@ -67,34 +67,10 @@ jobs:
               test -f "$JAVA_HOME/jre/lib/rt.jar"
               test -f /opt/android-sdk-linux/platforms/android-35/android.jar
 
-              # cargo-apk expects the Java 8 rt.jar; D8 itself needs Java 17.
+              # Install the dx compatibility shim beside every available D8.
               for BT_DIR in /opt/android-sdk-linux/build-tools/*; do
                 if [ -x "$BT_DIR/d8" ]; then
-                  cat > "$BT_DIR/dx" <<'DXSH'
-              #!/bin/sh
-              out=classes.dex
-              minapi=1
-              inputs=""
-              while [ "$#" -gt 0 ]; do
-                case "$1" in
-                  --dex) shift ;;
-                  --output=*) out="${1#--output=}"; shift ;;
-                  --output) out="$2"; shift 2 ;;
-                  --min-sdk-version) minapi="$2"; shift 2 ;;
-                  --min-api) minapi="$2"; shift 2 ;;
-                  *) inputs="$inputs $1"; shift ;;
-                esac
-              done
-              expanded=""
-              for inp in $inputs; do
-                if [ -d "$inp" ]; then
-                  expanded="$expanded $(find "$inp" -name '*.class')"
-                else
-                  expanded="$expanded $inp"
-                fi
-              done
-              exec env JAVA_HOME=/opt/jdk17 PATH="/opt/jdk17/bin:$PATH" "$(dirname "$0")/d8" --output "$(dirname "$out")" --min-api "$minapi" $expanded
-              DXSH
+                  cp /root/src/scripts/android-dx-shim.sh "$BT_DIR/dx"
                   chmod +x "$BT_DIR/dx"
                 fi
               done
