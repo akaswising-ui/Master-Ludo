@@ -15,45 +15,95 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
+      - name: Set up Java 8 for cargo-apk javac
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Save Java 8 path
+        run: echo "JAVA8_HOME=$JAVA_HOME" >> "$GITHUB_ENV"
+
+      - name: Set up Java 17 for Android D8
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
+
+      - name: Save Java 17 path
+        run: echo "JAVA17_HOME=$JAVA_HOME" >> "$GITHUB_ENV"
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
         with:
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
 
-      - name: Verify Android SDK and Java
+      - name: Verify Android SDK and both JDKs
         run: |
           test -n "$ANDROID_HOME"
           test -f "$ANDROID_HOME/platforms/android-35/android.jar"
           test -x "$ANDROID_HOME/build-tools/35.0.0/aapt"
-          java -version
+          test -f "$JAVA8_HOME/jre/lib/rt.jar"
+          test -x "$JAVA8_HOME/bin/javac"
+          test -x "$JAVA17_HOME/bin/java"
+          "$JAVA8_HOME/bin/javac" -version
+          "$JAVA17_HOME/bin/java" -version
 
       - name: Build release APK with compatible Rust and Java toolchains
         run: |
           docker run --rm \
             -v "${{ github.workspace }}:/root/src" \
             -v "$ANDROID_HOME:/opt/android-sdk-linux" \
-            -v "$JAVA_HOME:/opt/jdk17:ro" \
+            -v "$JAVA8_HOME:/opt/jdk8:ro" \
+            -v "$JAVA17_HOME:/opt/jdk17:ro" \
             -w /root/src \
             -e ANDROID_HOME=/opt/android-sdk-linux \
             -e ANDROID_SDK_ROOT=/opt/android-sdk-linux \
-            -e JAVA_HOME=/opt/jdk17 \
+            -e JAVA_HOME=/opt/jdk8 \
             notfl3/cargo-apk /bin/bash -lc '
-              set -e
-              export JAVA_HOME=/opt/jdk17
-              export PATH="$JAVA_HOME/bin:/opt/android-sdk-linux/build-tools/35.0.0:$PATH"
-              java -version
+              set -eu
+              export JAVA_HOME=/opt/jdk8
+              export PATH="$JAVA_HOME/bin:/opt/android-sdk-linux/platform-tools:$PATH"
+              test -f "$JAVA_HOME/jre/lib/rt.jar"
+              test -f /opt/android-sdk-linux/platforms/android-35/android.jar
+
+              # cargo-apk expects the Java 8 rt.jar; D8 itself needs Java 17.
+              for BT_DIR in /opt/android-sdk-linux/build-tools/*; do
+                if [ -x "$BT_DIR/d8" ]; then
+                  cat > "$BT_DIR/dx" <<'DXSH'
+              #!/bin/sh
+              out=classes.dex
+              minapi=1
+              inputs=""
+              while [ "$#" -gt 0 ]; do
+                case "$1" in
+                  --dex) shift ;;
+                  --output=*) out="${1#--output=}"; shift ;;
+                  --output) out="$2"; shift 2 ;;
+                  --min-sdk-version) minapi="$2"; shift 2 ;;
+                  --min-api) minapi="$2"; shift 2 ;;
+                  *) inputs="$inputs $1"; shift ;;
+                esac
+              done
+              expanded=""
+              for inp in $inputs; do
+                if [ -d "$inp" ]; then
+                  expanded="$expanded $(find "$inp" -name '*.class')"
+                else
+                  expanded="$expanded $inp"
+                fi
+              done
+              exec env JAVA_HOME=/opt/jdk17 PATH="/opt/jdk17/bin:$PATH" "$(dirname "$0")/d8" --output "$(dirname "$out")" --min-api "$minapi" $expanded
+              DXSH
+                  chmod +x "$BT_DIR/dx"
+                fi
+              done
+
               rustup toolchain install 1.87.0 --profile minimal
               rustup target add --toolchain 1.87.0 armv7-linux-androideabi aarch64-linux-android
               rustup default 1.87.0
               rustc --version
               cargo --version
-              test -f /opt/android-sdk-linux/platforms/android-35/android.jar
               cargo quad-apk build --release
             '
 
