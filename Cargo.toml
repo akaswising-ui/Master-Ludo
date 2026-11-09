@@ -11,8 +11,8 @@ macroquad = "0.4.16"
 [package.metadata.android]
 package_name = "com.akaswising.masterludo"
 label = "Master Ludo"
-android_version = 35
-target_sdk_version = 35
+android_version = 36
+target_sdk_version = 36
 min_sdk_version = 23
 build_targets = ["armv7-linux-androideabi", "aarch64-linux-android"]
 
