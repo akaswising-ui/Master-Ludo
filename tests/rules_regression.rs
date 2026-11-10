@@ -76,5 +76,8 @@ fn supported_player_counts_create_distinct_players_with_four_tokens_each() {
 #[test]
 fn player_color_indices_match_the_four_board_entries() {
     assert_eq!(PlayerColor::ALL.map(PlayerColor::index), [0, 1, 2, 3]);
-    assert_eq!(PlayerColor::ALL.map(PlayerColor::start_index), [0, 13, 26, 39]);
+    assert_eq!(
+        PlayerColor::ALL.map(PlayerColor::start_index),
+        [0, 13, 26, 39]
+    );
 }
