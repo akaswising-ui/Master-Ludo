@@ -1,5 +1,5 @@
 use macroquad::prelude::*;
-use master_ludo::{Game, Phase, PlayerColor, Pos, SAFE_SQUARES, TRACK, YARD, FINISHED};
+use master_ludo::{Game, Phase, PlayerColor, Pos, FINISHED, SAFE_SQUARES, TRACK, YARD};
 
 const BACKGROUND: Color = Color::new(0.055, 0.075, 0.12, 1.0);
 const PANEL: Color = Color::new(0.10, 0.13, 0.19, 1.0);
@@ -65,10 +65,27 @@ async fn main() {
                 let roll_rect = (screen_width() * 0.5 - 104.0, panel_y + 63.0, 208.0, 52.0);
                 let menu_rect = (screen_width() - 104.0, 24.0, 88.0, 38.0);
 
-                if clicked && point_in_rect(mouse_x, mouse_y, menu_rect.0, menu_rect.1, menu_rect.2, menu_rect.3) {
+                if clicked
+                    && point_in_rect(
+                        mouse_x,
+                        mouse_y,
+                        menu_rect.0,
+                        menu_rect.1,
+                        menu_rect.2,
+                        menu_rect.3,
+                    )
+                {
                     return_to_menu = true;
-                } else if clicked && active_game.phase == Phase::AwaitRoll
-                    && point_in_rect(mouse_x, mouse_y, roll_rect.0, roll_rect.1, roll_rect.2, roll_rect.3)
+                } else if clicked
+                    && active_game.phase == Phase::AwaitRoll
+                    && point_in_rect(
+                        mouse_x,
+                        mouse_y,
+                        roll_rect.0,
+                        roll_rect.1,
+                        roll_rect.2,
+                        roll_rect.3,
+                    )
                 {
                     let roll = macroquad::rand::gen_range(1u8, 7u8);
                     let _ = active_game.roll_dice(roll);
@@ -80,13 +97,24 @@ async fn main() {
                     if let Some(token_index) = tapped_token(active_game, layout, mouse_x, mouse_y) {
                         let _ = active_game.move_token(token_index);
                     }
-                } else if clicked && active_game.phase == Phase::GameOver
-                    && point_in_rect(mouse_x, mouse_y, roll_rect.0, roll_rect.1, roll_rect.2, roll_rect.3)
+                } else if clicked
+                    && active_game.phase == Phase::GameOver
+                    && point_in_rect(
+                        mouse_x,
+                        mouse_y,
+                        roll_rect.0,
+                        roll_rect.1,
+                        roll_rect.2,
+                        roll_rect.3,
+                    )
                 {
                     restart_game = true;
                 }
 
-                if !clicked && is_key_pressed(KeyCode::Space) && active_game.phase == Phase::AwaitRoll {
+                if !clicked
+                    && is_key_pressed(KeyCode::Space)
+                    && active_game.phase == Phase::AwaitRoll
+                {
                     let roll = macroquad::rand::gen_range(1u8, 7u8);
                     let _ = active_game.roll_dice(roll);
                     let legal = active_game.legal_moves();
@@ -111,7 +139,13 @@ fn draw_menu(player_count: usize) {
     let width = screen_width();
     let height = screen_height();
     let title = "MASTER LUDO";
-    draw_text(title, 28.0, height * 0.25, 48.0_f32.min(width * 0.105), WHITE);
+    draw_text(
+        title,
+        28.0,
+        height * 0.25,
+        48.0_f32.min(width * 0.105),
+        WHITE,
+    );
     draw_text(
         "A classic board game, built entirely in Rust",
         30.0,
@@ -132,7 +166,11 @@ fn draw_menu(player_count: usize) {
             button_width,
             58.0,
             &format!("{count} PLAYERS"),
-            if selected { color_for(PlayerColor::Green) } else { PANEL },
+            if selected {
+                color_for(PlayerColor::Green)
+            } else {
+                PANEL
+            },
             if selected { WHITE } else { MUTED },
         );
     }
@@ -198,11 +236,41 @@ fn draw_board_base(layout: BoardLayout) {
     let t = layout.top;
     let c = layout.cell;
 
-    draw_rectangle(l - 4.0, t - 4.0, layout.side + 8.0, layout.side + 8.0, BOARD);
-    draw_rectangle(l, t, c * 6.0, c * 6.0, tint(color_for(PlayerColor::Red), 0.20));
-    draw_rectangle(l + c * 9.0, t, c * 6.0, c * 6.0, tint(color_for(PlayerColor::Green), 0.20));
-    draw_rectangle(l + c * 9.0, t + c * 9.0, c * 6.0, c * 6.0, tint(color_for(PlayerColor::Yellow), 0.20));
-    draw_rectangle(l, t + c * 9.0, c * 6.0, c * 6.0, tint(color_for(PlayerColor::Blue), 0.20));
+    draw_rectangle(
+        l - 4.0,
+        t - 4.0,
+        layout.side + 8.0,
+        layout.side + 8.0,
+        BOARD,
+    );
+    draw_rectangle(
+        l,
+        t,
+        c * 6.0,
+        c * 6.0,
+        tint(color_for(PlayerColor::Red), 0.20),
+    );
+    draw_rectangle(
+        l + c * 9.0,
+        t,
+        c * 6.0,
+        c * 6.0,
+        tint(color_for(PlayerColor::Green), 0.20),
+    );
+    draw_rectangle(
+        l + c * 9.0,
+        t + c * 9.0,
+        c * 6.0,
+        c * 6.0,
+        tint(color_for(PlayerColor::Yellow), 0.20),
+    );
+    draw_rectangle(
+        l,
+        t + c * 9.0,
+        c * 6.0,
+        c * 6.0,
+        tint(color_for(PlayerColor::Blue), 0.20),
+    );
 
     // The four white yards.
     for (color, gx, gy) in [
@@ -229,7 +297,13 @@ fn draw_board_base(layout: BoardLayout) {
         draw_rectangle(x, y, c, c, BOARD);
         draw_rectangle_lines(x, y, c, c, 1.0, Color::new(0.78, 0.79, 0.77, 1.0));
         if SAFE_SQUARES.contains(&index) {
-            draw_text("★", x + c * 0.22, y + c * 0.72, c * 0.66, Color::new(0.80, 0.61, 0.10, 1.0));
+            draw_text(
+                "★",
+                x + c * 0.22,
+                y + c * 0.72,
+                c * 0.66,
+                Color::new(0.80, 0.61, 0.10, 1.0),
+            );
         }
     }
 
@@ -239,7 +313,13 @@ fn draw_board_base(layout: BoardLayout) {
         for (step, pos) in lane.iter().enumerate() {
             let x = l + pos.x as f32 * c;
             let y = t + pos.y as f32 * c;
-            draw_rectangle(x, y, c, c, tint(color_for(color), if step == 5 { 0.95 } else { 0.55 }));
+            draw_rectangle(
+                x,
+                y,
+                c,
+                c,
+                tint(color_for(color), if step == 5 { 0.95 } else { 0.55 }),
+            );
             draw_rectangle_lines(x, y, c, c, 1.0, BOARD);
         }
     }
@@ -253,8 +333,18 @@ fn draw_board_base(layout: BoardLayout) {
     let left_bottom = vec2(x0, y0 + c * 3.0);
     let center = vec2(x0 + c * 1.5, y0 + c * 1.5);
     draw_triangle(left_top, right_top, center, color_for(PlayerColor::Green));
-    draw_triangle(right_top, right_bottom, center, color_for(PlayerColor::Yellow));
-    draw_triangle(right_bottom, left_bottom, center, color_for(PlayerColor::Blue));
+    draw_triangle(
+        right_top,
+        right_bottom,
+        center,
+        color_for(PlayerColor::Yellow),
+    );
+    draw_triangle(
+        right_bottom,
+        left_bottom,
+        center,
+        color_for(PlayerColor::Blue),
+    );
     draw_triangle(left_bottom, left_top, center, color_for(PlayerColor::Red));
     draw_rectangle_lines(x0, y0, c * 3.0, c * 3.0, 1.5, INK);
 
@@ -263,7 +353,13 @@ fn draw_board_base(layout: BoardLayout) {
         let start = TRACK[color.start_index()];
         let x = l + start.x as f32 * c;
         let y = t + start.y as f32 * c;
-        draw_rectangle(x + c * 0.08, y + c * 0.08, c * 0.84, c * 0.84, tint(color_for(color), 0.85));
+        draw_rectangle(
+            x + c * 0.08,
+            y + c * 0.08,
+            c * 0.84,
+            c * 0.84,
+            tint(color_for(color), 0.85),
+        );
     }
 }
 
@@ -272,13 +368,18 @@ fn draw_tokens(game: &Game, layout: BoardLayout) {
     for (player_index, player) in game.players.iter().enumerate() {
         for token_index in 0..4 {
             let (x, y) = token_screen_position(game, player_index, token_index, layout);
-            let is_selectable = player_index == game.current_player
-                && game.legal_moves().contains(&token_index);
+            let is_selectable =
+                player_index == game.current_player && game.legal_moves().contains(&token_index);
             if is_selectable {
                 draw_circle_lines(x, y, c * 0.39, 3.0, GOLD);
             }
             let token_color = color_for(player.color);
-            draw_circle(x, y + c * 0.045, c * 0.28, Color::new(0.05, 0.06, 0.08, 0.22));
+            draw_circle(
+                x,
+                y + c * 0.045,
+                c * 0.28,
+                Color::new(0.05, 0.06, 0.08, 0.22),
+            );
             draw_circle(x, y, c * 0.27, token_color);
             draw_circle_lines(x, y, c * 0.27, 2.0, BOARD);
             draw_circle(x, y, c * 0.09, Color::new(1.0, 1.0, 1.0, 0.88));
@@ -299,7 +400,10 @@ fn draw_status(game: &Game, layout: BoardLayout) {
         WHITE,
     );
     draw_text(
-        &format!("HOME: {}/4", game.players[game.current_player].finished_count()),
+        &format!(
+            "HOME: {}/4",
+            game.players[game.current_player].finished_count()
+        ),
         screen_width() - 112.0,
         panel_y + 33.0,
         13.0,
@@ -377,10 +481,30 @@ fn tapped_token(game: &Game, layout: BoardLayout, x: f32, y: f32) -> Option<usiz
 
 fn yard_position(color: PlayerColor, token_index: usize) -> Pos {
     let positions = match color {
-        PlayerColor::Red => [Pos::new(2, 2), Pos::new(4, 2), Pos::new(2, 4), Pos::new(4, 4)],
-        PlayerColor::Green => [Pos::new(10, 2), Pos::new(12, 2), Pos::new(10, 4), Pos::new(12, 4)],
-        PlayerColor::Yellow => [Pos::new(10, 10), Pos::new(12, 10), Pos::new(10, 12), Pos::new(12, 12)],
-        PlayerColor::Blue => [Pos::new(2, 10), Pos::new(4, 10), Pos::new(2, 12), Pos::new(4, 12)],
+        PlayerColor::Red => [
+            Pos::new(2, 2),
+            Pos::new(4, 2),
+            Pos::new(2, 4),
+            Pos::new(4, 4),
+        ],
+        PlayerColor::Green => [
+            Pos::new(10, 2),
+            Pos::new(12, 2),
+            Pos::new(10, 4),
+            Pos::new(12, 4),
+        ],
+        PlayerColor::Yellow => [
+            Pos::new(10, 10),
+            Pos::new(12, 10),
+            Pos::new(10, 12),
+            Pos::new(12, 12),
+        ],
+        PlayerColor::Blue => [
+            Pos::new(2, 10),
+            Pos::new(4, 10),
+            Pos::new(2, 12),
+            Pos::new(4, 12),
+        ],
     };
     positions[token_index]
 }
