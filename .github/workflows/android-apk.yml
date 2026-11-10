@@ -26,6 +26,12 @@ jobs:
       - name: Run Rust game and rules tests
         run: cargo test --all-targets
 
+      - name: Normalize lockfile for legacy cargo-apk parser
+        run: |
+          if grep -q '^version = 4$' Cargo.lock; then
+            sed -i 's/^version = 4$/version = 3/' Cargo.lock
+          fi
+
       - name: Set up Java 8 for cargo-apk javac
         uses: actions/setup-java@v5
         with:
@@ -99,7 +105,7 @@ jobs:
       - name: Collect APK
         run: |
           mkdir -p dist
-          find target/android-artifacts/release/apk -type f -name '*.apk' -exec cp {} dist/ \;
+          find target/android-artifacts/release/apk -type f -name '*.apk' -exec cp {} dist/ \\;
           test -n "$(find dist -type f -name '*.apk' -print -quit)"
 
       - name: Upload installable APK
