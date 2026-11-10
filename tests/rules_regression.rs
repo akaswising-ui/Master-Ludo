@@ -36,10 +36,10 @@ fn an_illegal_token_choice_does_not_change_the_board_or_pending_roll() {
 
     let before = game.players[0].tokens;
     assert_eq!(game.legal_moves(), vec![0]);
-    assert_eq!(
+    assert!(matches!(
         game.move_token(1),
         Err("That token cannot move with this dice value.")
-    );
+    ));
 
     assert_eq!(game.players[0].tokens, before);
     assert_eq!(game.phase, Phase::AwaitToken);
@@ -52,7 +52,7 @@ fn an_out_of_range_token_index_is_rejected_without_mutation() {
     game.roll_dice(6).unwrap();
 
     let before = game.players[0].tokens;
-    assert_eq!(game.move_token(4), Err("Invalid token index."));
+    assert!(matches!(game.move_token(4), Err("Invalid token index.")));
     assert_eq!(game.players[0].tokens, before);
     assert_eq!(game.phase, Phase::AwaitToken);
     assert_eq!(game.dice, Some(6));
