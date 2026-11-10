@@ -15,6 +15,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Check Rust formatting
+        run: cargo fmt --all -- --check
+
+      - name: Run Rust game and rules tests
+        run: cargo test --all-targets
+
       - name: Set up Java 8 for cargo-apk javac
         uses: actions/setup-java@v5
         with:
