@@ -105,7 +105,7 @@ jobs:
       - name: Collect APK
         run: |
           mkdir -p dist
-          find target/android-artifacts/release/apk -type f -name '*.apk' -exec cp {} dist/ \\;
+          find target/android-artifacts/release/apk -type f -name '*.apk' -exec cp {} dist/ +
           test -n "$(find dist -type f -name '*.apk' -print -quit)"
 
       - name: Upload installable APK
