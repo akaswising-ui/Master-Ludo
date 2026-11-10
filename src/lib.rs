@@ -23,18 +23,58 @@ impl Pos {
 
 /// The shared 52-square outer route, clockwise around the board.
 pub const TRACK: [Pos; TRACK_LEN] = [
-    Pos::new(1, 6), Pos::new(2, 6), Pos::new(3, 6), Pos::new(4, 6), Pos::new(5, 6),
-    Pos::new(6, 5), Pos::new(6, 4), Pos::new(6, 3), Pos::new(6, 2), Pos::new(6, 1),
-    Pos::new(6, 0), Pos::new(7, 0), Pos::new(8, 0),
-    Pos::new(8, 1), Pos::new(8, 2), Pos::new(8, 3), Pos::new(8, 4), Pos::new(8, 5),
-    Pos::new(9, 6), Pos::new(10, 6), Pos::new(11, 6), Pos::new(12, 6), Pos::new(13, 6),
-    Pos::new(14, 6), Pos::new(14, 7), Pos::new(14, 8),
-    Pos::new(13, 8), Pos::new(12, 8), Pos::new(11, 8), Pos::new(10, 8), Pos::new(9, 8),
-    Pos::new(8, 9), Pos::new(8, 10), Pos::new(8, 11), Pos::new(8, 12), Pos::new(8, 13),
-    Pos::new(8, 14), Pos::new(7, 14), Pos::new(6, 14),
-    Pos::new(6, 13), Pos::new(6, 12), Pos::new(6, 11), Pos::new(6, 10), Pos::new(6, 9),
-    Pos::new(5, 8), Pos::new(4, 8), Pos::new(3, 8), Pos::new(2, 8), Pos::new(1, 8),
-    Pos::new(0, 8), Pos::new(0, 7), Pos::new(0, 6),
+    Pos::new(1, 6),
+    Pos::new(2, 6),
+    Pos::new(3, 6),
+    Pos::new(4, 6),
+    Pos::new(5, 6),
+    Pos::new(6, 5),
+    Pos::new(6, 4),
+    Pos::new(6, 3),
+    Pos::new(6, 2),
+    Pos::new(6, 1),
+    Pos::new(6, 0),
+    Pos::new(7, 0),
+    Pos::new(8, 0),
+    Pos::new(8, 1),
+    Pos::new(8, 2),
+    Pos::new(8, 3),
+    Pos::new(8, 4),
+    Pos::new(8, 5),
+    Pos::new(9, 6),
+    Pos::new(10, 6),
+    Pos::new(11, 6),
+    Pos::new(12, 6),
+    Pos::new(13, 6),
+    Pos::new(14, 6),
+    Pos::new(14, 7),
+    Pos::new(14, 8),
+    Pos::new(13, 8),
+    Pos::new(12, 8),
+    Pos::new(11, 8),
+    Pos::new(10, 8),
+    Pos::new(9, 8),
+    Pos::new(8, 9),
+    Pos::new(8, 10),
+    Pos::new(8, 11),
+    Pos::new(8, 12),
+    Pos::new(8, 13),
+    Pos::new(8, 14),
+    Pos::new(7, 14),
+    Pos::new(6, 14),
+    Pos::new(6, 13),
+    Pos::new(6, 12),
+    Pos::new(6, 11),
+    Pos::new(6, 10),
+    Pos::new(6, 9),
+    Pos::new(5, 8),
+    Pos::new(4, 8),
+    Pos::new(3, 8),
+    Pos::new(2, 8),
+    Pos::new(1, 8),
+    Pos::new(0, 8),
+    Pos::new(0, 7),
+    Pos::new(0, 6),
 ];
 
 /// Start squares and star squares are protected from captures.
@@ -76,20 +116,36 @@ impl PlayerColor {
     pub const fn home_lane(self) -> [Pos; 6] {
         match self {
             Self::Red => [
-                Pos::new(1, 7), Pos::new(2, 7), Pos::new(3, 7),
-                Pos::new(4, 7), Pos::new(5, 7), Pos::new(6, 7),
+                Pos::new(1, 7),
+                Pos::new(2, 7),
+                Pos::new(3, 7),
+                Pos::new(4, 7),
+                Pos::new(5, 7),
+                Pos::new(6, 7),
             ],
             Self::Green => [
-                Pos::new(7, 1), Pos::new(7, 2), Pos::new(7, 3),
-                Pos::new(7, 4), Pos::new(7, 5), Pos::new(7, 6),
+                Pos::new(7, 1),
+                Pos::new(7, 2),
+                Pos::new(7, 3),
+                Pos::new(7, 4),
+                Pos::new(7, 5),
+                Pos::new(7, 6),
             ],
             Self::Yellow => [
-                Pos::new(13, 7), Pos::new(12, 7), Pos::new(11, 7),
-                Pos::new(10, 7), Pos::new(9, 7), Pos::new(8, 7),
+                Pos::new(13, 7),
+                Pos::new(12, 7),
+                Pos::new(11, 7),
+                Pos::new(10, 7),
+                Pos::new(9, 7),
+                Pos::new(8, 7),
             ],
             Self::Blue => [
-                Pos::new(7, 13), Pos::new(7, 12), Pos::new(7, 11),
-                Pos::new(7, 10), Pos::new(7, 9), Pos::new(7, 8),
+                Pos::new(7, 13),
+                Pos::new(7, 12),
+                Pos::new(7, 11),
+                Pos::new(7, 10),
+                Pos::new(7, 9),
+                Pos::new(7, 8),
             ],
         }
     }
@@ -313,7 +369,10 @@ impl Game {
                 self.consecutive_sixes = 0;
             }
             self.message = if captured > 0 {
-                format!("{} captured {captured} token(s). Roll again!", color.label())
+                format!(
+                    "{} captured {captured} token(s). Roll again!",
+                    color.label()
+                )
             } else if reached_home {
                 format!("{} brought a token home. Roll again!", color.label())
             } else {
